@@ -43,4 +43,6 @@ public class PlayerVisuals : MonoBehaviour
                 break;
         }
     }
+
+    
 }
