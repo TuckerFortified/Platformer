@@ -1,5 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
@@ -10,6 +12,9 @@ public class PlayerController : MonoBehaviour
     public float AccelerationSpeed;
     public float DecelerationSpeed;
     Vector2 playerInput;
+    private float lastXPos;
+    private float currentXPos;
+    private bool leftOrRight;
     public enum FacingDirection
     {
         left, right
@@ -27,7 +32,7 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
+        
         //The input from the player needs to be determined and then passed in the to the MovementUpdate which should
         //manage the actual movement of the character.
         
@@ -42,22 +47,50 @@ public class PlayerController : MonoBehaviour
         else
         {
             //playerInput.x = playerInput.x * 0.99f;
+            playerInput.x = 0;
             
         }
         playerInput.x = Mathf.Clamp(playerInput.x, -MaxSpeed, MaxSpeed);
         MovementUpdate(playerInput);
     }
 
+    public void FixedUpdate()
+    {
+        lastXPos = currentXPos;
+        currentXPos = transform.position.x;
+
+        if ((currentXPos - lastXPos) > 0)
+        {
+            //right
+            leftOrRight = true;
+        }
+        else if ((currentXPos - lastXPos) < 0)
+        {
+            //left
+            leftOrRight = false;
+        }
+    }
+
     private void MovementUpdate(Vector2 playerInput)
     {
+        
         Debug.Log(playerInput);
         rigidbody.MovePosition(new Vector2(transform.position.x + (Time.deltaTime * Speed * playerInput.x), transform.position.y));
+        
     }
 
 
     public bool IsWalking()
     {
-        return false;
+        if (transform.position.x == lastXPos)
+        {
+            return false;
+        }
+        else
+        {
+            return true;
+        }
+        
     }
     public bool IsGrounded()
     {
@@ -66,7 +99,17 @@ public class PlayerController : MonoBehaviour
 
     public FacingDirection GetFacingDirection()
     {
-        return FacingDirection.left;
+        
+        if (leftOrRight == true)
+        {
+            return FacingDirection.right;
+        }
+        else
+        {
+            return FacingDirection.left;
+        }
+        
+        
     }
 
     private void OnCollisionStay2D(Collision2D collision)
