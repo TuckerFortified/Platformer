@@ -15,6 +15,7 @@ public class PlayerController : MonoBehaviour
     private float lastXPos;
     private float currentXPos;
     private bool leftOrRight;
+    private bool onGroundIs;
     public enum FacingDirection
     {
         left, right
@@ -94,7 +95,14 @@ public class PlayerController : MonoBehaviour
     }
     public bool IsGrounded()
     {
-        return true;
+        if (onGroundIs)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
 
     public FacingDirection GetFacingDirection()
@@ -112,8 +120,16 @@ public class PlayerController : MonoBehaviour
         
     }
 
-    private void OnCollisionStay2D(Collision2D collision)
+    private void OnTriggerStay2D(Collider2D collision)
     {
-        
+        onGroundIs = true;
+        Debug.Log(onGroundIs);
     }
+
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        onGroundIs = false;
+        Debug.Log(onGroundIs);
+    }
+
 }
