@@ -1700,7 +1700,9 @@ MonoBehaviour:
   DecelerationSpeed: 1
   jumpVel: 200
   gravityScale: 300
-  maxFallingSpeed: 200
+  TerminalSpeed: 150
+  coyoteTime: 1
+  coyoteTimer: 0
 --- !u!4 &1433354315
 Transform:
   m_ObjectHideFlags: 0

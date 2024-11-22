@@ -26,6 +26,8 @@ public class PlayerController : MonoBehaviour
     private float velocity;
     public float gravityScale;
     public float TerminalSpeed;
+    public float coyoteTime;
+    public float coyoteTimer;
 
     // Start is called before the first frame update
     void Start()
@@ -53,14 +55,27 @@ public class PlayerController : MonoBehaviour
         }
         else
         {
-            //playerInput.x = playerInput.x * 0.99f;
+            
             playerInput.x = 0;
             
         }
         playerInput.x = Mathf.Clamp(playerInput.x, -MaxSpeed, MaxSpeed);
         MovementUpdate(playerInput);
-        
-        
+
+        //For coyote time
+        coyoteTimer += Time.deltaTime;
+
+        if (jumping)
+        {
+            coyoteTimer = 0;
+        }
+
+        if (onGroundIs)
+        {
+            coyoteTimer = 0;
+        }
+
+        Debug.Log(coyoteTimer);
     }
 
     public void FixedUpdate()
@@ -83,7 +98,7 @@ public class PlayerController : MonoBehaviour
     private void MovementUpdate(Vector2 playerInput)
     {
 
-        if (IsGrounded() && Input.GetKey(KeyCode.Space)) 
+        if ((IsGrounded() || (coyoteTimer < coyoteTime && coyoteTimer != 0)) && Input.GetKey(KeyCode.Space))
         {
             jumping = true;
             velocity = jumpVel;
@@ -119,10 +134,12 @@ public class PlayerController : MonoBehaviour
     {
         if (onGroundIs)
         {
+
             return true;
         }
         else
         {
+ 
             return false;
         }
     }
@@ -146,6 +163,7 @@ public class PlayerController : MonoBehaviour
     {
         onGroundIs = true;
         Debug.Log(onGroundIs);
+        
     }
 
     private void OnTriggerExit2D(Collider2D collision)
