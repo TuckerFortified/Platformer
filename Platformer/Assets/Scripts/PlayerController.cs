@@ -21,13 +21,19 @@ public class PlayerController : MonoBehaviour
         left, right
     }
 
-    
+    private bool jumping;
+    public float jumpVel;
+    private float velocity;
+    public float gravityScale;
+    public float TerminalSpeed;
 
     // Start is called before the first frame update
     void Start()
     {
         rigidbody = GetComponent<Rigidbody2D>();
         playerInput = new Vector2(0, 0);
+        jumping = false;
+        velocity = 0;
     }
 
     // Update is called once per frame
@@ -53,6 +59,8 @@ public class PlayerController : MonoBehaviour
         }
         playerInput.x = Mathf.Clamp(playerInput.x, -MaxSpeed, MaxSpeed);
         MovementUpdate(playerInput);
+        
+        
     }
 
     public void FixedUpdate()
@@ -74,10 +82,24 @@ public class PlayerController : MonoBehaviour
 
     private void MovementUpdate(Vector2 playerInput)
     {
-        
-        Debug.Log(playerInput);
-        rigidbody.MovePosition(new Vector2(transform.position.x + (Time.deltaTime * Speed * playerInput.x), transform.position.y));
-        
+
+        if (IsGrounded() && Input.GetKey(KeyCode.Space)) 
+        {
+            jumping = true;
+            velocity = jumpVel;
+        }
+        else if (IsGrounded())
+        {
+            jumping = false;
+            velocity = 0;
+        }
+
+
+        velocity = Mathf.Clamp(velocity, -TerminalSpeed, 1000);
+        rigidbody.MovePosition(new Vector2(transform.position.x + (Time.deltaTime * Speed * playerInput.x), transform.position.y + (velocity * Time.deltaTime)));
+        velocity = velocity - (gravityScale * Time.deltaTime);
+
+
     }
 
 
