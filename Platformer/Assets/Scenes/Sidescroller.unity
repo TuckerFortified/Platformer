@@ -1695,14 +1695,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Speed: 5
-  MaxSpeed: 20
-  AccelerationSpeed: 30
+  MaxSpeed: 2
+  AccelerationSpeed: 3
   DecelerationSpeed: 1
-  jumpVel: 200
-  gravityScale: 300
-  TerminalSpeed: 150
+  jumpVel: 14
+  gravityScale: 30
+  TerminalSpeed: 15
   coyoteTime: 1
   coyoteTimer: 0
+  currentHealth: 1
+  currentState: 0
+  previousState: 0
 --- !u!4 &1433354315
 Transform:
   m_ObjectHideFlags: 0

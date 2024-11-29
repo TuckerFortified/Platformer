@@ -29,6 +29,11 @@ public class PlayerController : MonoBehaviour
     public float coyoteTime;
     public float coyoteTimer;
 
+    private bool walkingLeft;
+    private bool walkingRight;
+
+    public int currentHealth;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -36,31 +41,88 @@ public class PlayerController : MonoBehaviour
         playerInput = new Vector2(0, 0);
         jumping = false;
         velocity = 0;
+        walkingLeft = false;
+        walkingRight = false;
     }
 
     // Update is called once per frame
     void Update()
     {
+
+        previousState = currentState;
         
+        if (IsDead())
+        {
+            currentState = CharacterState.die;
+        }
+
+        switch(currentState)
+        {
+            case CharacterState.idle:
+                if (IsWalking())
+                {
+                    currentState = CharacterState.walk;
+                }
+                if (!IsGrounded())
+                {
+                    currentState = CharacterState.jump;
+                }
+                break;
+
+            case CharacterState.walk:
+                if (!IsWalking())
+                {
+                    currentState = CharacterState.idle;
+                }
+                if (!IsGrounded())
+                {
+                    currentState = CharacterState.jump;
+                }
+                break;
+            
+            case CharacterState.jump:
+                if (IsGrounded())
+                {
+                    if (IsWalking())
+                    {
+                        currentState = CharacterState.walk;
+                    }
+                    else
+                    {
+                        currentState = CharacterState.idle;
+                    }
+                    
+                }
+                break;
+
+            case CharacterState.die:
+
+
+                break;
+        }
+
         //The input from the player needs to be determined and then passed in the to the MovementUpdate which should
         //manage the actual movement of the character.
-        
+
         if (Input.GetKey(KeyCode.A))
         {
-            playerInput.x = playerInput.x + (-AccelerationSpeed * Time.deltaTime);
-        }
-        else if (Input.GetKey(KeyCode.D))
-        {
-            playerInput.x = playerInput.x + (AccelerationSpeed * Time.deltaTime);
+            walkingLeft = true;
         }
         else
         {
-            
-            playerInput.x = 0;
-            
+            walkingLeft = false;
         }
-        playerInput.x = Mathf.Clamp(playerInput.x, -MaxSpeed, MaxSpeed);
-        MovementUpdate(playerInput);
+
+        if (Input.GetKey(KeyCode.D))
+        {
+            walkingRight = true;
+        }
+        else
+        {
+            walkingRight = false;
+        }
+        
+        
 
         //For coyote time
         coyoteTimer += Time.deltaTime;
@@ -93,6 +155,27 @@ public class PlayerController : MonoBehaviour
             //left
             leftOrRight = false;
         }
+
+        //Movement
+        if (walkingLeft && !walkingRight)
+        {
+            playerInput.x = playerInput.x + (-AccelerationSpeed * Time.deltaTime);
+        }
+        else if (walkingRight && !walkingLeft)
+        {
+            playerInput.x = playerInput.x + (AccelerationSpeed * Time.deltaTime);
+        }
+        else
+        {
+            playerInput.x = 0;
+        }
+        playerInput.x = Mathf.Clamp(playerInput.x, -MaxSpeed, MaxSpeed);
+        MovementUpdate(playerInput);
+
+        velocity = Mathf.Clamp(velocity, -TerminalSpeed, 1000);
+        rigidbody.MovePosition(new Vector2(transform.position.x + (Time.deltaTime * Speed * playerInput.x), transform.position.y + (velocity * Time.deltaTime)));
+        velocity = velocity - (gravityScale * Time.deltaTime);
+
     }
 
     private void MovementUpdate(Vector2 playerInput)
@@ -109,12 +192,6 @@ public class PlayerController : MonoBehaviour
             velocity = 0;
         }
 
-
-        velocity = Mathf.Clamp(velocity, -TerminalSpeed, 1000);
-        rigidbody.MovePosition(new Vector2(transform.position.x + (Time.deltaTime * Speed * playerInput.x), transform.position.y + (velocity * Time.deltaTime)));
-        velocity = velocity - (gravityScale * Time.deltaTime);
-
-
     }
 
 
@@ -128,7 +205,7 @@ public class PlayerController : MonoBehaviour
         {
             return true;
         }
-        
+
     }
     public bool IsGrounded()
     {
@@ -139,10 +216,30 @@ public class PlayerController : MonoBehaviour
         }
         else
         {
- 
+
             return false;
         }
     }
+
+    public bool IsDead()
+    {
+        return currentHealth <= 0;
+    }
+
+    public void OnDeathAnimationComplete()
+    {
+        gameObject.SetActive(false);
+    }
+
+    public enum CharacterState
+    {
+        idle, walk, jump, die
+    }
+
+    public CharacterState currentState = CharacterState.idle;
+    public CharacterState previousState = CharacterState.idle;
+
+
 
     public FacingDirection GetFacingDirection()
     {
