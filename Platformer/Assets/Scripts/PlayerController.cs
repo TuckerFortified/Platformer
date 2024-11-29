@@ -34,6 +34,14 @@ public class PlayerController : MonoBehaviour
 
     public int currentHealth;
 
+    private float dashWindow;
+    private bool dashLeft;
+    private bool dashRight;
+    private bool dashing;
+    private float dashDuration;
+    private bool canDash;
+    private float dashCooldown;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -43,6 +51,9 @@ public class PlayerController : MonoBehaviour
         velocity = 0;
         walkingLeft = false;
         walkingRight = false;
+        dashWindow = 0;
+        dashing = false;
+        canDash = true;
     }
 
     // Update is called once per frame
@@ -107,6 +118,11 @@ public class PlayerController : MonoBehaviour
         if (Input.GetKey(KeyCode.A))
         {
             walkingLeft = true;
+            if (dashWindow < 0.5f && !dashing && dashLeft && dashCooldown < 0 && canDash)
+            {
+                dashing = true;
+                dashDuration = 0;
+            }
         }
         else
         {
@@ -116,12 +132,16 @@ public class PlayerController : MonoBehaviour
         if (Input.GetKey(KeyCode.D))
         {
             walkingRight = true;
+            if (dashWindow < 0.5f && !dashing && dashRight && dashCooldown < 0 && canDash)
+            {
+                dashing = true;
+                dashDuration = 0;
+            }
         }
         else
         {
             walkingRight = false;
         }
-        
         
 
         //For coyote time
@@ -137,7 +157,25 @@ public class PlayerController : MonoBehaviour
             coyoteTimer = 0;
         }
 
-        Debug.Log(coyoteTimer);
+        //Debug.Log(coyoteTimer);
+
+
+        //Player dashing input
+        dashWindow += Time.deltaTime;
+
+        if (Input.GetKeyUp(KeyCode.A))
+        {
+            dashWindow = 0;
+            dashLeft = true;
+            dashRight = false;
+        }
+
+        if (Input.GetKeyUp(KeyCode.D))
+        {
+            dashWindow = 0;
+            dashRight = true;
+            dashLeft = false;
+        }
     }
 
     public void FixedUpdate()
@@ -172,9 +210,33 @@ public class PlayerController : MonoBehaviour
         playerInput.x = Mathf.Clamp(playerInput.x, -MaxSpeed, MaxSpeed);
         MovementUpdate(playerInput);
 
-        velocity = Mathf.Clamp(velocity, -TerminalSpeed, 1000);
-        rigidbody.MovePosition(new Vector2(transform.position.x + (Time.deltaTime * Speed * playerInput.x), transform.position.y + (velocity * Time.deltaTime)));
-        velocity = velocity - (gravityScale * Time.deltaTime);
+        if (!dashing)
+        {
+            velocity = Mathf.Clamp(velocity, -TerminalSpeed, 1000);
+            rigidbody.MovePosition(new Vector2(transform.position.x + (Time.deltaTime * Speed * playerInput.x), transform.position.y + (velocity * Time.deltaTime)));
+            velocity = velocity - (gravityScale * Time.deltaTime);
+            dashCooldown -= 1;
+        }
+
+        if (dashing)
+        {
+            if (dashDuration > 5 && dashRight || dashDuration > 7 && dashLeft)
+            { 
+                dashing = false;
+                dashCooldown = 15;
+                canDash = false;
+                dashLeft = false;
+                dashRight = false;
+            }
+            float dashMovement = 0.5f;
+            if (dashLeft == true)
+            {
+                dashMovement = -0.5f;
+            }
+            rigidbody.MovePosition(new Vector2(transform.position.x + dashMovement, transform.position.y));
+            dashDuration += 1;
+        }
+
 
     }
 
@@ -190,6 +252,7 @@ public class PlayerController : MonoBehaviour
         {
             jumping = false;
             velocity = 0;
+            canDash = true;
         }
 
     }

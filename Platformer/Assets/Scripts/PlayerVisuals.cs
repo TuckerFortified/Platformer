@@ -34,18 +34,21 @@ public class PlayerVisuals : MonoBehaviour
 
         if (playerController.previousState != playerController.currentState)
         {
+            
             switch(playerController.currentState)
             {
                 case PlayerController.CharacterState.idle:
+                    Debug.Log("Shit1");
                     animator.CrossFade("Idle", 0f);
                     break;
 
                 case PlayerController.CharacterState.walk:
-                    animator.CrossFade("Walk", 0f);
+                    animator.CrossFade("Walking", 0f);
+                    Debug.Log("Shit");
                     break;
 
                 case PlayerController.CharacterState.jump:
-                    animator.CrossFade("Jump", 0f);
+                    animator.CrossFade("Jumping", 0f);
                     break;
 
                 case PlayerController.CharacterState.die:
@@ -54,13 +57,7 @@ public class PlayerVisuals : MonoBehaviour
             }
         }
 
-        animator.SetBool(isWalkingHash, playerController.IsWalking());
-        animator.SetBool(isGroundedHash, playerController.IsGrounded());
-
-        if (playerController.IsDead())
-        {
-            animator.SetTrigger(OnDeathHash);
-        }
+        
 
         switch (playerController.GetFacingDirection())
         {
