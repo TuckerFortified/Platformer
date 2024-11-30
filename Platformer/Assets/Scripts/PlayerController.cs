@@ -28,6 +28,9 @@ public class PlayerController : MonoBehaviour
     public float TerminalSpeed;
     public float coyoteTime;
     public float coyoteTimer;
+    private float spacePressed;
+    private bool jumpOnce;
+    private bool jumpTwice;
 
     private bool walkingLeft;
     private bool walkingRight;
@@ -176,6 +179,43 @@ public class PlayerController : MonoBehaviour
             dashRight = true;
             dashLeft = false;
         }
+
+        //Jumping Input
+        if ((IsGrounded() || (coyoteTimer < coyoteTime && coyoteTimer != 0)) && Input.GetKey(KeyCode.Space) && !jumping)
+        {
+            jumping = true;
+            jumpOnce = true;
+            velocity = jumpVel;
+            spacePressed = 0;
+        }
+        else if (coyoteTimer > coyoteTime)
+        {
+            jumpOnce = true;
+        }
+        else if (!Input.GetKey(KeyCode.Space) && jumpOnce)
+        {
+            spacePressed += 1;
+        }
+        else if (!IsGrounded() && jumpOnce && Input.GetKey(KeyCode.Space) && spacePressed > 0 && !jumpTwice)
+        {
+            jumping = true;
+            jumpTwice = true;
+            velocity = jumpVel;
+        }
+        else if (IsGrounded())
+        {
+            jumping = false;
+            velocity = 0;
+            if (!canDash)
+            {
+                canDash = true;
+            }
+
+            jumpOnce = false;
+            jumpTwice = false;
+            spacePressed = 0;
+        }
+
     }
 
     public void FixedUpdate()
@@ -208,7 +248,7 @@ public class PlayerController : MonoBehaviour
             playerInput.x = 0;
         }
         playerInput.x = Mathf.Clamp(playerInput.x, -MaxSpeed, MaxSpeed);
-        MovementUpdate(playerInput);
+        
 
         if (!dashing)
         {
@@ -237,23 +277,6 @@ public class PlayerController : MonoBehaviour
             dashDuration += 1;
         }
 
-
-    }
-
-    private void MovementUpdate(Vector2 playerInput)
-    {
-
-        if ((IsGrounded() || (coyoteTimer < coyoteTime && coyoteTimer != 0)) && Input.GetKey(KeyCode.Space))
-        {
-            jumping = true;
-            velocity = jumpVel;
-        }
-        else if (IsGrounded())
-        {
-            jumping = false;
-            velocity = 0;
-            canDash = true;
-        }
 
     }
 
@@ -323,6 +346,11 @@ public class PlayerController : MonoBehaviour
     {
         onGroundIs = true;
         Debug.Log(onGroundIs);
+
+        if (collision.tag == "Trampoline")
+        {
+            velocity = 20;
+        }
         
     }
 
@@ -330,6 +358,7 @@ public class PlayerController : MonoBehaviour
     {
         onGroundIs = false;
         Debug.Log(onGroundIs);
+        
     }
 
 }

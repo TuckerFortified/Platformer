@@ -1694,13 +1694,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 86a1ce42ea3e3dd44868493ae73ec06d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Speed: 5
+  Speed: 6
   MaxSpeed: 2
-  AccelerationSpeed: 3
+  AccelerationSpeed: 4
   DecelerationSpeed: 1
   jumpVel: 14
   gravityScale: 30
-  TerminalSpeed: 15
+  TerminalSpeed: 10
   coyoteTime: 1
   coyoteTimer: 0
   currentHealth: 1
