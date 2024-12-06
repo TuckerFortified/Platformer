@@ -9,8 +9,8 @@ public class PlayerController : MonoBehaviour
     private Rigidbody2D rigidbody;
     public float Speed;
     public float MaxSpeed;
-    public float AccelerationSpeed;
-    public float DecelerationSpeed;
+    public float AccelerationTime;
+    public float DecelerationTime;
     Vector2 playerInput;
     private float lastXPos;
     private float currentXPos;
@@ -59,7 +59,7 @@ public class PlayerController : MonoBehaviour
         canDash = true;
     }
 
-    // Update is called once per frame
+    
     void Update()
     {
 
@@ -121,7 +121,7 @@ public class PlayerController : MonoBehaviour
         if (Input.GetKey(KeyCode.A))
         {
             walkingLeft = true;
-            if (dashWindow < 0.5f && !dashing && dashLeft && dashCooldown < 0 && canDash)
+            if (dashWindow < 0.2f && !dashing && dashLeft && dashCooldown < 0 && canDash)
             {
                 dashing = true;
                 dashDuration = 0;
@@ -135,7 +135,7 @@ public class PlayerController : MonoBehaviour
         if (Input.GetKey(KeyCode.D))
         {
             walkingRight = true;
-            if (dashWindow < 0.5f && !dashing && dashRight && dashCooldown < 0 && canDash)
+            if (dashWindow < 0.2f && !dashing && dashRight && dashCooldown < 0 && canDash)
             {
                 dashing = true;
                 dashDuration = 0;
@@ -150,17 +150,16 @@ public class PlayerController : MonoBehaviour
         //For coyote time
         coyoteTimer += Time.deltaTime;
 
-        if (jumping)
-        {
-            coyoteTimer = 0;
-        }
+        //if (jumping)
+       // {
+         //   coyoteTimer = 0;
+       /// }
 
         if (onGroundIs)
         {
             coyoteTimer = 0;
         }
 
-        //Debug.Log(coyoteTimer);
 
 
         //Player dashing input
@@ -181,7 +180,7 @@ public class PlayerController : MonoBehaviour
         }
 
         //Jumping Input
-        if ((IsGrounded() || (coyoteTimer < coyoteTime && coyoteTimer != 0)) && Input.GetKey(KeyCode.Space) && !jumping)
+        if ((IsGrounded() || (coyoteTimer < coyoteTime && coyoteTimer != 0)) && Input.GetKey(KeyCode.Space) )
         {
             jumping = true;
             jumpOnce = true;
@@ -235,17 +234,31 @@ public class PlayerController : MonoBehaviour
         }
 
         //Movement
+        float acceleration = MaxSpeed / AccelerationTime;
+        float decaleration = MaxSpeed / DecelerationTime;
+
         if (walkingLeft && !walkingRight)
         {
-            playerInput.x = playerInput.x + (-AccelerationSpeed * Time.deltaTime);
+            //playerInput.x = playerInput.x + (-AccelerationTime * Time.deltaTime);
+            playerInput.x -= acceleration * Time.deltaTime;
         }
         else if (walkingRight && !walkingLeft)
         {
-            playerInput.x = playerInput.x + (AccelerationSpeed * Time.deltaTime);
+            //playerInput.x = playerInput.x + (AccelerationTime * Time.deltaTime);
+            playerInput.x += acceleration * Time.deltaTime;
         }
         else
         {
-            playerInput.x = 0;
+            if (leftOrRight)
+            {
+                playerInput.x -= decaleration * Time.deltaTime;
+                playerInput.x = Mathf.Clamp(playerInput.x, 0, MaxSpeed);
+            }
+            if (!leftOrRight)
+            {
+                playerInput.x += decaleration * Time.deltaTime;
+                playerInput.x = Mathf.Clamp(playerInput.x, -MaxSpeed, 0);
+            }
         }
         playerInput.x = Mathf.Clamp(playerInput.x, -MaxSpeed, MaxSpeed);
         
@@ -304,6 +317,7 @@ public class PlayerController : MonoBehaviour
         {
 
             return false;
+            
         }
     }
 
