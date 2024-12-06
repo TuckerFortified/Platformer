@@ -180,41 +180,33 @@ public class PlayerController : MonoBehaviour
         }
 
         //Jumping Input
-        if ((IsGrounded() || (coyoteTimer < coyoteTime && coyoteTimer != 0)) && Input.GetKey(KeyCode.Space) )
+        if ((IsGrounded() || (coyoteTimer < coyoteTime && coyoteTimer != 0)) && Input.GetKey(KeyCode.Space))
         {
             jumping = true;
             jumpOnce = true;
             velocity = jumpVel;
             spacePressed = 0;
         }
-        else if (coyoteTimer > coyoteTime)
-        {
-            jumpOnce = true;
-        }
-        else if (!Input.GetKey(KeyCode.Space) && jumpOnce)
-        {
-            spacePressed += 1;
-        }
         else if (!IsGrounded() && jumpOnce && Input.GetKey(KeyCode.Space) && spacePressed > 0 && !jumpTwice)
         {
+       
             jumping = true;
             jumpTwice = true;
             velocity = jumpVel;
         }
-        else if (IsGrounded())
+        else if (coyoteTimer > coyoteTime)
         {
-            jumping = false;
-            velocity = 0;
-            if (!canDash)
-            {
-                canDash = true;
-            }
-
-            jumpOnce = false;
-            jumpTwice = false;
-            spacePressed = 0;
+            
+            jumpOnce = true;
         }
+        else if (Input.GetKeyUp(KeyCode.Space) && jumpOnce)
+        {
+            
+            spacePressed += 1;
+        }
+        
 
+        //Debug.Log(!IsGrounded() && jumpOnce && Input.GetKey(KeyCode.Space) && spacePressed > 0 && !jumpTwice);
     }
 
     public void FixedUpdate()
@@ -239,12 +231,10 @@ public class PlayerController : MonoBehaviour
 
         if (walkingLeft && !walkingRight)
         {
-            //playerInput.x = playerInput.x + (-AccelerationTime * Time.deltaTime);
             playerInput.x -= acceleration * Time.deltaTime;
         }
         else if (walkingRight && !walkingLeft)
         {
-            //playerInput.x = playerInput.x + (AccelerationTime * Time.deltaTime);
             playerInput.x += acceleration * Time.deltaTime;
         }
         else
@@ -359,19 +349,34 @@ public class PlayerController : MonoBehaviour
     private void OnTriggerStay2D(Collider2D collision)
     {
         onGroundIs = true;
-        Debug.Log(onGroundIs);
 
+        //When player lands on trampoline
         if (collision.tag == "Trampoline")
         {
             velocity = 20;
         }
+        else
+        {
+            //When Player lands on ground
+            jumping = false;
+            velocity = 0;
+            if (!canDash)
+            {
+                canDash = true;
+            }
+
+            jumpOnce = false;
+            jumpTwice = false;
+            spacePressed = 0;
+        }
+
+
         
     }
 
     private void OnTriggerExit2D(Collider2D collision)
     {
         onGroundIs = false;
-        Debug.Log(onGroundIs);
         
     }
 
