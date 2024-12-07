@@ -7,6 +7,8 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
     private Rigidbody2D rigidbody;
+
+    //Hprizontal Movement
     public float Speed;
     public float MaxSpeed;
     public float AccelerationTime;
@@ -20,7 +22,10 @@ public class PlayerController : MonoBehaviour
     {
         left, right
     }
-
+    private bool walkingLeft;
+    private bool walkingRight;
+    
+    //Vertical Movement
     private bool jumping;
     public float jumpVel;
     private float velocity;
@@ -32,11 +37,9 @@ public class PlayerController : MonoBehaviour
     private bool jumpOnce;
     private bool jumpTwice;
 
-    private bool walkingLeft;
-    private bool walkingRight;
-
     public int currentHealth;
 
+    //Dashing
     private float dashWindow;
     private bool dashLeft;
     private bool dashRight;
@@ -45,7 +48,6 @@ public class PlayerController : MonoBehaviour
     private bool canDash;
     private float dashCooldown;
 
-    // Start is called before the first frame update
     void Start()
     {
         rigidbody = GetComponent<Rigidbody2D>();
@@ -63,6 +65,7 @@ public class PlayerController : MonoBehaviour
     void Update()
     {
 
+        //Changing animation states
         previousState = currentState;
         
         if (IsDead())
@@ -111,13 +114,10 @@ public class PlayerController : MonoBehaviour
 
             case CharacterState.die:
 
-
                 break;
         }
 
-        //The input from the player needs to be determined and then passed in the to the MovementUpdate which should
-        //manage the actual movement of the character.
-
+        //Managing player inputs for walking and dashing (does not actually change the transform)
         if (Input.GetKey(KeyCode.A))
         {
             walkingLeft = true;
@@ -147,14 +147,8 @@ public class PlayerController : MonoBehaviour
         }
         
 
-        //For coyote time
+        //Coyote Timer Incrementing
         coyoteTimer += Time.deltaTime;
-
-        //if (jumping)
-       // {
-         //   coyoteTimer = 0;
-       /// }
-
         if (onGroundIs)
         {
             coyoteTimer = 0;
@@ -162,7 +156,7 @@ public class PlayerController : MonoBehaviour
 
 
 
-        //Player dashing input
+        //Player dashing input - this is continued from the code earlier (it is technically the first part of the dashing code but it is lower down in the document)
         dashWindow += Time.deltaTime;
 
         if (Input.GetKeyUp(KeyCode.A))
@@ -179,7 +173,7 @@ public class PlayerController : MonoBehaviour
             dashLeft = false;
         }
 
-        //Jumping Input
+        //Jumping Input Management (Does not actually move the player)
         if ((IsGrounded() || (coyoteTimer < coyoteTime && coyoteTimer != 0)) && Input.GetKey(KeyCode.Space))
         {
             jumping = true;
@@ -205,12 +199,12 @@ public class PlayerController : MonoBehaviour
             spacePressed += 1;
         }
         
-
-        //Debug.Log(!IsGrounded() && jumpOnce && Input.GetKey(KeyCode.Space) && spacePressed > 0 && !jumpTwice);
     }
 
     public void FixedUpdate()
     {
+
+        //Changing the player facing direction.
         lastXPos = currentXPos;
         currentXPos = transform.position.x;
 
@@ -225,10 +219,12 @@ public class PlayerController : MonoBehaviour
             leftOrRight = false;
         }
 
-        //Movement
+
+        //Updating the player movement and position in the level based on the input from update.
         float acceleration = MaxSpeed / AccelerationTime;
         float decaleration = MaxSpeed / DecelerationTime;
 
+        //Left and right acceleration.
         if (walkingLeft && !walkingRight)
         {
             playerInput.x -= acceleration * Time.deltaTime;
@@ -239,6 +235,7 @@ public class PlayerController : MonoBehaviour
         }
         else
         {
+            //Left and right decaleration (I can't spell).
             if (leftOrRight)
             {
                 playerInput.x -= decaleration * Time.deltaTime;
@@ -253,6 +250,7 @@ public class PlayerController : MonoBehaviour
         playerInput.x = Mathf.Clamp(playerInput.x, -MaxSpeed, MaxSpeed);
         
 
+        //If the player isn't dashing: update gravity, jumping, and horizontal movement.
         if (!dashing)
         {
             velocity = Mathf.Clamp(velocity, -TerminalSpeed, 1000);
@@ -261,6 +259,7 @@ public class PlayerController : MonoBehaviour
             dashCooldown -= 1;
         }
 
+        //Player dashing movement update.
         if (dashing)
         {
             if (dashDuration > 5 && dashRight || dashDuration > 7 && dashLeft)
